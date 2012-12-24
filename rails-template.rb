@@ -6,22 +6,27 @@
 # Misc
 gem 'thin'
 gem 'rb-readline'
+gem 'squeel'         # Make AREL more fun
 
 # Frontend-related
 gem 'draper'
 gem 'haml-rails'
 gem 'jquery-rails'
-gem 'rabl'
+gem 'rabl'          # JSON views, instead of to_json
 
 if with_mobile = yes?("Mobile too?")
- gem 'mobylette'
+ gem 'mobylette'    # Mobile detection and handling
 end
 
 
 # Authentication
-if with_devise = yes?("Authentication ?")
+if with_devise = yes?("Authentication with devise ?")
   gem 'devise'
-  gem 'cancan'
+  gem 'cancan'    # Permissions
+
+  if with_facebook = yes?("Omniauth for facebook?")
+    gem 'omniauth-facebook'
+  end
 end
 
 # Asset Pipeline
@@ -66,6 +71,15 @@ if with_devise
   generate "devise User"
   rake "db:migrate"
   generate "cancan:ability"
+
+  if with_facebook
+    initializer 'omniauth.rb', <<-CODE
+      Rails.application.config.middleware.use OmniAuth::Builder do
+          provider :facebook, ENV['FACEBOOK_KEY'], ENV['FACEBOOK_SECRET'],
+                       :scope => 'email', :display => 'popup'
+      end
+    CODE
+  end
 end
 
 if with_bootstrap
