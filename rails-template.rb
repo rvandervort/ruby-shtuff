@@ -66,6 +66,14 @@ run 'guard init'
 run 'guard init rspec'
 
 
+# Rabl - no roots
+initializer 'rabl.rb', <<-CODE
+require 'rabl'
+Rabl.configure do |config|
+  config.include_json_root = false
+end
+CODE
+
 if with_devise
   generate "devise:install"
   generate "devise User"
@@ -74,10 +82,10 @@ if with_devise
 
   if with_facebook
     initializer 'omniauth.rb', <<-CODE
-      Rails.application.config.middleware.use OmniAuth::Builder do
-          provider :facebook, ENV['FACEBOOK_KEY'], ENV['FACEBOOK_SECRET'],
-                       :scope => 'email', :display => 'popup'
-      end
+Rails.application.config.middleware.use OmniAuth::Builder do
+    provider :facebook, ENV['FACEBOOK_KEY'], ENV['FACEBOOK_SECRET'],
+                 :scope => 'email', :display => 'popup'
+end
     CODE
   end
 end
@@ -86,6 +94,30 @@ if with_bootstrap
   generate 'bootstrap:install less'
   layout = ask("Bootstrap layout ? (fixed|fluid): ")
   generate "bootstrap:layout application #{layout}"
+
+  run 'rm app/views/layouts/applitcation.html.erb'
+end
+
+if with_facebook
+  run 'mkdir app/controllers/users'
+
+  # Create the callbacks controller
+  file 'app/controllers/users/omniauth_callbacks_controller.rb', <<-CODE
+class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
+  def facebook
+    # Replace with the actual authentication code here -- request.env["omniauth.auth"]
+  end
+end
+  CODE
+
+  # Create the route entries
+  route <<-CODE
+devise_for :users, :controllers => { :omniauth_callbacks => "users/omniauth_callbacks" }
+devise_scope :user do
+  match "/users/auth/facebook/callbacks", controller: "omniauth_callbacks", action: "facebook"
+end
+  CODE
+
 end
 
 # ========================================================================
@@ -104,6 +136,11 @@ git :commit => "-a -m 'create initial application'"
 say <<-eos
   ============================================================================
   Rails app  #{app_name} is ready to go !!
-
 eos
+
+if with_facebook
+  say <<-eos
+    - devise_for and devise_scope for omniauth_callbacks needed
+  eos
+end
 
