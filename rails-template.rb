@@ -57,6 +57,9 @@ if with_devise
 end
 
 if with_bootstrap
+  # Go get the rails application template
+  run 'curl https://raw.githubusercontent.com/rvandervort/ruby-shtuff/master/application.html.haml > app/views/layouts/application.html.haml'
+
   # Bootstrap Stylesheets
   run 'mv app/assets/stylesheets/application.css app/assets/stylesheets/application.scss'
   append_file 'app/assets/stylesheets/application.scss', <<-CODE
@@ -85,6 +88,15 @@ if with_react
 
   application "config.react.addons = true"
 end
+
+# No helpers, view_specs, or helper_specs
+application <<-CODE
+config.generators do |g|
+  g.helper = false
+  g.view_specs = false
+  g.helper_specs = false
+end
+CODE
 
 # ========================================================================
 # Cleanup
