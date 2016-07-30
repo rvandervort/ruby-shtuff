@@ -57,8 +57,10 @@ if with_devise
 end
 
 if with_bootstrap
+
   # Go get the rails application template
-  run 'curl https://raw.githubusercontent.com/rvandervort/ruby-shtuff/master/application.html.haml > app/views/layouts/application.html.haml'
+  run 'rm app/views/layouts/application.html.erb'
+  run 'curl https://raw.githubusercontent.com/rvandervort/ruby-shtuff/master/application.hmtl.haml > app/views/layouts/application.html.haml'
 
   # Bootstrap Stylesheets
   run 'mv app/assets/stylesheets/application.css app/assets/stylesheets/application.scss'
@@ -101,7 +103,7 @@ CODE
 # ========================================================================
 # Cleanup
 # ========================================================================
-rake 'haml:erb2haml'
+run 'yes | bundle exec rake haml:erb2haml'
 remove_file "public/index.html"
 
 
