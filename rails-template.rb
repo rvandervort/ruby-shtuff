@@ -3,25 +3,21 @@
 # Gem Declarations
 # ========================================================================
 
-# Misc
-gem 'thin'
-
-# Frontend-related
-gem 'haml-rails'
-gem 'jbuilder'
-
 # Authentication
 if with_devise = yes?("Authentication with devise ?")
   gem 'devise'
   gem 'cancan'    # Permissions
 end
 
-# Asset Pipeline
-gem_group :assets do
-  gem 'libv8'
-  gem 'therubyracer'
-  gem 'execjs'
-end
+
+# Frontend-related
+gem 'haml-rails'
+gem 'jbuilder'
+
+# Asset Stuff
+gem 'libv8'
+gem 'therubyracer'
+gem 'execjs'
 
 
 if with_bootstrap = yes?("Use Twitter Bootstrap ?")
@@ -36,6 +32,7 @@ end
 gem_group :development, :test do
   gem 'pry'
   gem 'rspec-rails'
+  gem 'turnip'
 end
 
 
@@ -54,6 +51,12 @@ if with_devise
   rake "db:migrate"
   generate "cancan:ability"
   generate "devise:views"
+
+
+  append_file "db/seeds.rb", <<-CODE
+[User].each(&:delete_all)
+User.create(email: "test@test.com", password: "testme123")
+  CODE
 end
 
 if with_bootstrap
@@ -98,6 +101,12 @@ config.generators do |g|
   g.view_specs = false
   g.helper_specs = false
 end
+CODE
+
+# Setup testing
+append_file '.rspec', <<-CODE
+--color
+--require turnip/rspec
 CODE
 
 # ========================================================================
