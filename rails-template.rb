@@ -28,6 +28,10 @@ if with_react = yes?("Use ReactJS (react-rails) ?")
   gem 'react-rails'
 end
 
+if with_sapnwrfc = yes?("Use SAPNWRFC for SAP Connections?")
+  gem 'sapnwrfc'
+end
+
 # Development / Testing Gems
 gem_group :development, :test do
   gem 'pry'
@@ -57,6 +61,12 @@ if with_devise
 [User].each(&:delete_all)
 User.create(email: "test@test.com", password: "testme123")
   CODE
+
+  # TODO: The seeds file could contain more than just
+  # the user accounts, so this should be refactored
+  if yes?("Devise : generate test@test.com user?")
+    rake 'db:seed'
+  end
 end
 
 if with_bootstrap
@@ -92,6 +102,34 @@ if with_react
   CODE
 
   application "config.react.addons = true"
+end
+
+if yes?("generate dashboard controller and routes?")
+  generate 'controller', 'dashboard', 'index'
+  if yes?('set dashboard#index to root?')
+    route "root to: 'dashboard#index'"
+  end
+end
+
+if with_sapnwrfc
+  # Generate an initializer
+  initializer 'sapnwrfc.rb', <<-CODE
+require 'sapnwrfc'
+SAPNW::Base.config_location = "\#{Rails.root}/config/sapnwrfc.yml"
+SAPNW::Base.load_config
+CODE
+
+  # Generate a blank config file
+  file 'config/sapnwrfc.yml', <<-CODE
+ashost: [enter sap host]
+sysnr: [enter SAP system number]
+client: [enter SAP client]
+user: [enter SAP rfc user]
+passwd: [enter SAP rfc user's password]
+lang: EN
+trace: 0
+CODE
+
 end
 
 # No helpers, view_specs, or helper_specs
