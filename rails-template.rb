@@ -28,10 +28,6 @@ if with_react = yes?("Use ReactJS (react-rails) ?")
   gem 'react-rails'
 end
 
-if with_sapnwrfc = yes?("Use SAPNWRFC for SAP Connections?")
-  gem 'sapnwrfc'
-end
-
 # Development / Testing Gems
 gem_group :development, :test do
   gem 'pry'
